@@ -2,12 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
 
-// SignupPage — Improved UI
-// - Clean card layout with subtle branding
-// - Validation, inline errors, loading state
-// - Show/hide password, confirm password, accessible labels
-// - Friendly success message and redirect to login
-
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -20,129 +14,224 @@ export default function SignupPage() {
   const navigate = useNavigate();
   const nameRef = useRef(null);
 
-  useEffect(() => { nameRef.current?.focus(); }, []);
+  useEffect(() => {
+    nameRef.current?.focus();
+  }, []);
 
   const validate = () => {
-    if (!name.trim()) return "Enter your name";
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Enter a valid email";
-    if (!password || password.length < 4) return "Password must be at least 4 characters";
+    if (!name.trim()) return "Please enter your full name";
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return "Enter a valid email address";
+    if (!password || password.length < 4)
+      return "Password must be at least 4 characters";
     if (password !== confirm) return "Passwords do not match";
     return "";
   };
 
   const handleSignup = async (e) => {
-    if (e && e.preventDefault) e.preventDefault();
+    e?.preventDefault();
     setError("");
     setSuccess("");
     const v = validate();
-    if (v) { setError(v); return; }
+    if (v) return setError(v);
 
     try {
       setLoading(true);
-      const res = await API.post("/auth/register", { name: name.trim(), email: email.trim(), password });
-      setSuccess("Registered successfully. Redirecting to login...");
-      // small delay so user sees success message
+      await API.post("/auth/register", {
+        name: name.trim(),
+        email: email.trim(),
+        password,
+      });
+      setSuccess("🎉 Registered successfully! Redirecting to login...");
       setTimeout(() => navigate("/"), 1200);
     } catch (err) {
       console.error("signup error:", err);
-      setError(err?.response?.data?.message || err?.message || "Error during signup");
+      setError(
+        err?.response?.data?.message || err?.message || "Error during signup"
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-white p-6">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-lg bg-green-600 flex items-center justify-center text-white font-bold text-lg">B</div>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-emerald-100 p-6">
+      <div className="w-full max-w-md bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-100 p-8 animate-fadeInUp">
+        {/* Branding */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-600 to-emerald-500 flex items-center justify-center text-white font-bold text-lg shadow-md">
+            B
+          </div>
           <div>
-            <h2 className="text-xl font-semibold text-slate-800">Create your account</h2>
-            <p className="text-sm text-slate-500">Signing up is quick and easy</p>
+            <h2 className="text-2xl font-semibold text-slate-800">
+              Create your account
+            </h2>
+            <p className="text-sm text-slate-500">
+              Banking made simple and secure
+            </p>
           </div>
         </div>
 
-        <form onSubmit={handleSignup} className="space-y-4" aria-label="Signup form">
+        {/* Form */}
+        <form onSubmit={handleSignup} className="space-y-5" aria-label="Signup form">
+          {/* Name */}
           <div>
-            <label htmlFor="name" className="text-sm font-medium text-slate-700">Name</label>
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-slate-700 mb-1"
+            >
+              Full Name
+            </label>
             <input
               id="name"
               ref={nameRef}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full mt-1 px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-300"
-              placeholder="Your full name"
+              placeholder="John Doe"
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-green-400 focus:outline-none transition"
             />
           </div>
 
+          {/* Email */}
           <div>
-            <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-slate-700 mb-1"
+            >
+              Email address
+            </label>
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full mt-1 px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-300"
               placeholder="you@example.com"
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-green-400 focus:outline-none transition"
             />
           </div>
 
+          {/* Password */}
           <div>
-            <label htmlFor="password" className="text-sm font-medium text-slate-700">Password</label>
-            <div className="relative mt-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-slate-700 mb-1"
+            >
+              Password
+            </label>
+            <div className="relative">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-300"
-                placeholder="Choose a password"
-                aria-describedby="pw-help"
+                placeholder="Create a strong password"
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-green-400 focus:outline-none transition"
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(s => !s)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-slate-500 px-2 py-1 rounded-md hover:bg-slate-100"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-500 hover:text-green-600 transition"
+                aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? 'Hide' : 'Show'}
+                {showPassword ? "Hide" : "Show"}
               </button>
             </div>
-            <div id="pw-help" className="text-xs text-slate-400 mt-1">At least 4 characters</div>
+            <p className="text-xs text-slate-400 mt-1">
+              At least 4 characters required
+            </p>
           </div>
 
+          {/* Confirm Password */}
           <div>
-            <label htmlFor="confirm" className="text-sm font-medium text-slate-700">Confirm Password</label>
+            <label
+              htmlFor="confirm"
+              className="block text-sm font-medium text-slate-700 mb-1"
+            >
+              Confirm Password
+            </label>
             <input
               id="confirm"
               type={showPassword ? "text" : "password"}
               value={confirm}
               onChange={(e) => setConfirm(e.target.value)}
-              className="w-full mt-1 px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-green-300"
               placeholder="Re-enter your password"
+              className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-green-400 focus:outline-none transition"
             />
           </div>
 
-          {error && <div className="text-sm text-red-600">{error}</div>}
-          {success && <div className="text-sm text-green-600">{success}</div>}
+          {/* Error/Success messages */}
+          {error && (
+            <div className="text-sm bg-red-50 text-red-700 px-3 py-2 rounded-lg border border-red-100">
+              ⚠️ {error}
+            </div>
+          )}
+          {success && (
+            <div className="text-sm bg-green-50 text-green-700 px-3 py-2 rounded-lg border border-green-100">
+              ✅ {success}
+            </div>
+          )}
 
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-lg bg-green-600 text-white font-medium disabled:opacity-60"
+            className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-lg bg-gradient-to-r from-green-600 to-emerald-500 text-white font-medium shadow-md hover:shadow-lg hover:opacity-95 transition disabled:opacity-60"
           >
-            {loading ? (
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" /></svg>
-            ) : null}
-            <span>{loading ? 'Signing up...' : 'Signup'}</span>
+            {loading && (
+              <svg
+                className="animate-spin h-4 w-4 text-white"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                  fill="none"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                />
+              </svg>
+            )}
+            <span>{loading ? "Creating account..." : "Sign Up"}</span>
           </button>
 
-          <div className="text-center text-sm text-slate-500">
-            Already have an account? <button type="button" onClick={() => navigate('/')} className="text-green-600 underline">Login</button>
-          </div>
+          {/* Login link */}
+          <p className="text-center text-sm text-slate-500">
+            Already have an account?{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className="text-green-600 font-medium hover:underline"
+            >
+              Login here
+            </button>
+          </p>
         </form>
 
-        <div className="mt-6 text-center text-xs text-slate-400">By creating an account you agree to our terms of service.</div>
+        {/* Footer */}
+        <div className="mt-6 text-center text-xs text-slate-400">
+          By signing up, you agree to our{" "}
+          <a
+            href="#"
+            className="underline text-green-600 hover:text-green-700"
+          >
+            Terms
+          </a>{" "}
+          and{" "}
+          <a
+            href="#"
+            className="underline text-green-600 hover:text-green-700"
+          >
+            Privacy Policy
+          </a>
+          .
+        </div>
       </div>
     </div>
   );
