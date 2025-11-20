@@ -1,4 +1,3 @@
-// controllers/authController.js
 import User from "../models/User.js";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
@@ -22,9 +21,6 @@ export const register = async (req, res) => {
       role: "customer" // signup creates customers only
     });
 
-    // Optionally create an initial account record with balance 0 (not required but useful)
-    // import Account model at top if you want this:
-    // await Account.create({ userId: user._id, type: "deposit", amount: 0, balance_after: 0 });
 
     res.status(201).json({ message: "User registered", user: { id: user._id, name: user.name, email: user.email } });
   } catch (err) {
