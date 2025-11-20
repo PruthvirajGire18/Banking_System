@@ -134,7 +134,7 @@ export default function TransactionPopup({
               Amount
             </label>
             <div className="relative flex items-center">
-              <span className="absolute left-4 text-slate-400 text-lg">$</span>
+              <span className="absolute left-4 text-slate-400 text-lg">₹</span>
               <input
                 id="amount"
                 ref={inputRef}
@@ -183,7 +183,7 @@ export default function TransactionPopup({
             <div className="flex items-center justify-between text-sm text-slate-600 mt-2">
               <span>Available Balance</span>
               <strong className="text-slate-800">
-                ${Number(balance).toLocaleString()}
+                ₹{Number(balance).toLocaleString()}
               </strong>
             </div>
           )}
